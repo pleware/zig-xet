@@ -126,7 +126,7 @@ pub fn build(b: *std.Build) void {
 
     // This allows the user to pass arguments to the application in the build
     // command itself, like this: `zig build run -- arg1 arg2 etc`
-    run_cmd.addPassthruArgs();
+    run_cmd.addArgs(b.args orelse &.{});
     // Creates an executable that will run `test` blocks from the provided module.
     // Here `mod` needs to define a target, which is why earlier we made sure to
     // set the releative field.
@@ -198,7 +198,7 @@ pub fn build(b: *std.Build) void {
         const run_download = b.addRunArtifact(download_example);
         download_step.dependOn(&run_download.step);
         run_download.step.dependOn(b.getInstallStep());
-        run_download.addPassthruArgs();
+        run_download.addArgs(b.args orelse &.{});
 
         // Example: Download model with parallel fetching
         const download_parallel_example = b.addExecutable(.{
@@ -220,7 +220,7 @@ pub fn build(b: *std.Build) void {
         download_parallel_step.dependOn(&run_download_parallel.step);
         run_download_parallel.step.dependOn(b.getInstallStep());
 
-        run_download_parallel.addPassthruArgs();
+        run_download_parallel.addArgs(b.args orelse &.{});
         // Tool: Convert file to xorb format
         const file_to_xorb = b.addExecutable(.{
             .name = "file_to_xorb",
@@ -241,7 +241,7 @@ pub fn build(b: *std.Build) void {
         file_to_xorb_step.dependOn(&run_file_to_xorb.step);
         run_file_to_xorb.step.dependOn(b.getInstallStep());
 
-        run_file_to_xorb.addPassthruArgs();
+        run_file_to_xorb.addArgs(b.args orelse &.{});
         // Tool: Upload file to HuggingFace using XET protocol
         const upload_file = b.addExecutable(.{
             .name = "upload_file",
@@ -262,7 +262,7 @@ pub fn build(b: *std.Build) void {
         upload_step.dependOn(&run_upload.step);
         run_upload.step.dependOn(b.getInstallStep());
 
-        run_upload.addPassthruArgs();
+        run_upload.addArgs(b.args orelse &.{});
     }
 
     // Just like flags, top level steps are also listed in the `--help` menu.
