@@ -81,7 +81,7 @@ pub const Client = struct {
             if (proxy.protocol != .plain) return error.TlsProxyUnsupported;
 
             var host_buffer: [HostName.max_len]u8 = undefined;
-            const host = HostName.fromUri(uri, &host_buffer) catch break :tunnel;
+            const host = uri.getHost(&host_buffer) catch break :tunnel;
             const port = uri.port orelse 443;
 
             const connection = try self.connectThroughProxy(proxy, host, port);
@@ -107,7 +107,7 @@ pub const Client = struct {
         const client = &self.http_client;
         const io = self.io;
 
-        if (try client.connection_pool.findConnection(io, .{
+        if (client.connection_pool.findConnection(io, .{
             .host = host,
             .port = port,
             .protocol = .tls,
@@ -230,9 +230,9 @@ const Tunnel = struct {
 /// handshake.
 fn pump(io: std.Io, src: std.Io.net.Stream, dst: std.Io.net.Stream, buffer: []u8) void {
     var writer = dst.writer(io, &.{});
+    var reader = src.reader(io, &.{});
     while (true) {
-        var slices: [1][]u8 = .{buffer};
-        const len = src.read(io, &slices) catch break;
+        const len = reader.interface.readSliceShort(buffer) catch break;
         if (len == 0) break;
         writer.interface.writeAll(buffer[0..len]) catch break;
     }
